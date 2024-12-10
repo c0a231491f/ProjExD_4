@@ -72,6 +72,8 @@ class Bird(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = xy
         self.speed = 10
+        self.state = "normal"
+        self.hyper_life = 0
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -267,6 +269,19 @@ def main():
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
             emys.add(Enemy())
+        
+        if score.value >= 100 and event.type == pg.KEYDOWN and event.key == pg.K_RSHIFT:#右シフトを押したら無敵モード
+            bird.hyper_life = 500
+            bird.state = "hyper"
+            score.value -= 100
+
+        if bird.state == "hyper":#無敵モード状態の設定
+            bird.change_img(6, screen)
+            bird.image = pg.transform.laplacian(bird.image)
+            bird.hyper_life -= 1
+            if bird.hyper_life <= 0:
+                bird.change_img(3, screen)
+                bird.state = "normal"
 
         for emy in emys:
             if emy.state == "stop" and tmr%emy.interval == 0:
@@ -283,12 +298,17 @@ def main():
             score.value += 1  # 1点アップ
 
         for bomb in pg.sprite.spritecollide(bird, bombs, True):  # こうかとんと衝突した爆弾リスト
-            bird.change_img(8, screen)  # こうかとん悲しみエフェクト
-            score.update(screen)
-            pg.display.update()
-            time.sleep(2)
-            return
-
+            if bird.state == "normal": #通常モードの場合
+                bird.change_img(8, screen)  # こうかとん悲しみエフェクト
+                score.update(screen)
+                pg.display.update()
+                time.sleep(2)
+                return
+            
+            if bird.state == "hyper": #無敵モードの場合
+                exps.add(Explosion(bomb, 50))  # 爆発エフェクト
+                score.value += 1  # 1点アップ
+                
         bird.update(key_lst, screen)
         beams.update()
         beams.draw(screen)
