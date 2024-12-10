@@ -339,7 +339,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return 0
-            if event.type == pg.KEYDOWN and mods == left_shift_number and event.key == pg.K_SPACE:
+            if event.type == pg.KEYDOWN and (mods == left_shift_number or key_lst[pg.K_LSHIFT]) and event.key == pg.K_SPACE:
                 for i in neobeam.gen_beams():
                     beams.add(i)
             elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
